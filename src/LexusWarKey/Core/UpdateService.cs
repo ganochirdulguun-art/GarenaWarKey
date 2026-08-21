@@ -13,7 +13,7 @@ public sealed record UpdateInfo(Version Version, string DownloadUrl, string? Sha
 /// channel from the CDN download), then swaps it in place of the running exe and restarts.</summary>
 public sealed class UpdateService
 {
-    public const string Repo = "Tuguldur0107/LexusWarKey";
+    public const string Repo = "ganochirdulguun-art/LexusWarKey";
     private const string AssetName = "LexusWarKey.exe";
 
     private static readonly HttpClient Http = CreateClient();
