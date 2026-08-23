@@ -30,7 +30,7 @@ without editing game files or injecting a DLL.
 
 ## Download & install
 
-1. Go to the [latest release](https://github.com/Tuguldur0107/LexusWarKey/releases/latest).
+1. Go to the [latest release](https://github.com/ganochirdulguun-art/LexusWarKey/releases/latest).
 2. Download `LexusWarKey.exe` (portable — no installer).
 3. Run it. On first launch, sign in with **Discord**.
 

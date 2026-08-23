@@ -16,7 +16,7 @@ public enum HeartbeatResult { Ok, Unauthorized, Banned, Offline }
 /// player logs in once, and a periodic heartbeat marks them online in the admin dashboard.</summary>
 public sealed class AuthService
 {
-    public const string ServerUrl = "https://mongolian-warcraft-gaming-platform-production.up.railway.app";
+    public const string ServerUrl = "https://garenamn-production.up.railway.app";   // Garena.mn платформын сервер (Discord нэвтрэлт + /warkey/heartbeat)
 
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(15) };
     private readonly string _tokenPath;
