@@ -36,8 +36,8 @@ public partial class MainWindow : Window
             _banned = true;
             App.Auth.ClearToken();
             MessageBox.Show(
-                "Таны Discord акаунтыг Lexus WarKey ашиглахыг хориглосон байна.\nАдминтай холбогдоно уу.",
-                "Lexus WarKey", MessageBoxButton.OK, MessageBoxImage.Warning);
+                "Таны Discord акаунтыг Garena.mn WarKey ашиглахыг хориглосон байна.\nАдминтай холбогдоно уу.",
+                "Garena.mn WarKey", MessageBoxButton.OK, MessageBoxImage.Warning);
             ExitForReal();
         });
     }

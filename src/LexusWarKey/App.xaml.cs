@@ -23,7 +23,7 @@ public partial class App : Application
         {
             _singleInstance.Dispose();
             _singleInstance = null;
-            MessageBox.Show("Lexus WarKey аль хэдийн ажиллаж байна.", "Lexus WarKey",
+            MessageBox.Show("Garena.mn WarKey аль хэдийн ажиллаж байна.", "Garena.mn WarKey",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             Environment.Exit(0);
             return;

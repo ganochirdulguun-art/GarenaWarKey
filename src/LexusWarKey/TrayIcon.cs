@@ -24,7 +24,7 @@ public sealed class TrayIcon : IDisposable
         _icon = new Forms.NotifyIcon
         {
             Icon = LoadIcon(),
-            Text = "Lexus WarKey",
+            Text = "Garena.mn WarKey",
             Visible = true,
             ContextMenuStrip = menu,
         };
@@ -77,7 +77,7 @@ public sealed class TrayIcon : IDisposable
     {
         try
         {
-            _icon.BalloonTipTitle = "Lexus WarKey";
+            _icon.BalloonTipTitle = "Garena.mn WarKey";
             _icon.BalloonTipText = "Апп энд ажилласаар байна. Нээхийн тулд 2 удаа дар.";
             _icon.ShowBalloonTip(4000);
         }

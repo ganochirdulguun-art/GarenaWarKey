@@ -1,7 +1,7 @@
 <Window x:Class="LexusWarKey.Views.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Lexus WarKey — Нэвтрэх" Width="420" Height="380"
+        Title="Garena.mn WarKey — Нэвтрэх" Width="420" Height="380"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
         Background="{StaticResource B.Bg}"
         FontFamily="Segoe UI Variable Text, Segoe UI" UseLayoutRounding="True">

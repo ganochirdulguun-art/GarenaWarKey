@@ -1,4 +1,4 @@
-# Lexus WarKey
+# Garena.mn WarKey
 
 A Warcraft III **1.26a** / DotA **LoD** hotkey tool for Windows. It lets you play
 with the keys you want — including changing a skill's in‑game hotkey **mid‑match**,
@@ -35,7 +35,7 @@ without editing game files or injecting a DLL.
 3. Run it. On first launch, sign in with **Discord**.
 
 > Match the game's integrity level: if you run Warcraft III **as administrator**,
-> run Lexus WarKey as administrator too, or it can't read/write skill memory.
+> run Garena.mn WarKey as administrator too, or it can't read/write skill memory.
 
 ## Usage
 
