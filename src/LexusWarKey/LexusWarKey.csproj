@@ -8,7 +8,7 @@
     <UseWPF>true</UseWPF>
     <!-- for the notification-area icon -->
     <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyName>LexusWarKey</AssemblyName>
+    <AssemblyName>GarenaWarKey</AssemblyName>
     <Product>Garena.mn WarKey</Product>
     <AssemblyTitle>Garena.mn WarKey</AssemblyTitle>
     <Company>Garena.mn</Company>

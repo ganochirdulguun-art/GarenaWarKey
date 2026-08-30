@@ -14,14 +14,14 @@ public sealed record UpdateInfo(Version Version, string DownloadUrl, string? Sha
 public sealed class UpdateService
 {
     public const string Repo = "ganochirdulguun-art/LexusWarKey";
-    private const string AssetName = "LexusWarKey.exe";
+    private const string AssetName = "GarenaWarKey.exe";
 
     private static readonly HttpClient Http = CreateClient();
 
     private static HttpClient CreateClient()
     {
         var h = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
-        h.DefaultRequestHeaders.UserAgent.ParseAdd("LexusWarKey-Updater");
+        h.DefaultRequestHeaders.UserAgent.ParseAdd("GarenaWarKey-Updater");
         h.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
         return h;
     }
@@ -76,8 +76,8 @@ public sealed class UpdateService
             : Path.GetDirectoryName(exe);
     }
 
-    private static string DownloadPath(string dir) => Path.Combine(dir, "LexusWarKey.download.exe");
-    private static string OldPath(string dir) => Path.Combine(dir, "LexusWarKey.old.exe");
+    private static string DownloadPath(string dir) => Path.Combine(dir, "GarenaWarKey.download.exe");
+    private static string OldPath(string dir) => Path.Combine(dir, "GarenaWarKey.old.exe");
 
     /// <summary>Downloads and verifies the new exe next to the current one, without touching the running
     /// exe yet. Returns false (and leaves nothing behind) on any failure, incl. a hash mismatch.</summary>

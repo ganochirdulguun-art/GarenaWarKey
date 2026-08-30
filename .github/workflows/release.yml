@@ -50,11 +50,18 @@ jobs:
           -p:FileVersion=${{ steps.version.outputs.version }}.0
           -o publish
 
+      # v2.6.5 ба өмнөх updater-ууд "LexusWarKey.exe" нэртэй asset хайдаг тул ижил exe-г
+      # хуучин нэрээр давхар нийтэлнэ (байт ижил тул SHA256 нэг). Хэрэглэгчид v2.6.6+ дээр
+      # гарсны дараа legacy хуулбарыг хасаж болно.
+      - name: Legacy asset copy
+        shell: pwsh
+        run: Copy-Item publish/GarenaWarKey.exe publish/LexusWarKey.exe
+
       - name: Checksum
         id: checksum
         shell: pwsh
         run: |
-          $hash = (Get-FileHash publish/LexusWarKey.exe -Algorithm SHA256).Hash
+          $hash = (Get-FileHash publish/GarenaWarKey.exe -Algorithm SHA256).Hash
           "SHA256: $hash" | Tee-Object -FilePath publish/SHA256.txt
           "sha256=$hash" >> $env:GITHUB_OUTPUT
 
@@ -64,11 +71,12 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          name: Lexus WarKey ${{ github.ref_name }}
+          name: Garena.mn WarKey ${{ github.ref_name }}
           generate_release_notes: true
           append_body: true
           body: |
             SHA256: ${{ steps.checksum.outputs.sha256 }}
           files: |
+            publish/GarenaWarKey.exe
             publish/LexusWarKey.exe
             publish/SHA256.txt
