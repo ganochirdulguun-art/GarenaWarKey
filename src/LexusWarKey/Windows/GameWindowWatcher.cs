@@ -7,6 +7,22 @@ public sealed class GameWindowWatcher
 {
     private static readonly string[] GameProcessNames = { "war3", "Warcraft III", "Frozen Throne" };
 
+    /// <summary>Тоглоомын процесс ажиллаж байгаа эсэх — фокусаас үл хамааран.
+    /// Тоглолт дууссаныг (war3 хаагдсаныг) илрүүлэхэд ашиглана.</summary>
+    public static bool IsGameProcessRunning()
+    {
+        foreach (var name in GameProcessNames)
+        {
+            var procs = Process.GetProcessesByName(name);
+            var any = procs.Length > 0;
+            foreach (var p in procs)
+                p.Dispose();
+            if (any)
+                return true;
+        }
+        return false;
+    }
+
     private readonly object _gate = new();
     private uint _cachedPid;
     private bool _cachedIsGame;

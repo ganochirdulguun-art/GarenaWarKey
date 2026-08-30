@@ -272,6 +272,16 @@ public sealed partial class MainViewModel : ObservableObject
         _profile = _store.Load();
         _profile.NormaliseSlots();
 
+        // Skill-ийн үсэг тоглолт бүрд шинээр тааруулагддаг байх ёстой (эзний шийдвэр
+        // 2026-08-30): өмнөх session-оос үлдсэн үсэг дараагийн тоглолтод дамжвал
+        // тоглогчийг төөрөгдүүлдэг тул апп асахад цэвэрлэнэ.
+        if (_profile.SkillLetters.Count > 0)
+        {
+            DiagnosticLog.Write($"startup: өмнөх session-ий {_profile.SkillLetters.Count} skill үсэг цэвэрлэв");
+            _profile.SkillLetters.Clear();
+            _store.Save(_profile);
+        }
+
         DiagnosticLog.Write($"startup; skill binds={_profile.Skills.Count(m => m.ClaimsKey)}, warning={_store.LoadWarning ?? "none"}");
 
         _watcher = new GameWindowWatcher();
@@ -700,6 +710,29 @@ public sealed partial class MainViewModel : ObservableObject
 
     private string _lastTickLog = "";
 
+    // ---- Тоглолт дуусахад skill үсэгнүүдийг автоматаар цэвэрлэх төлөв ----
+    // Өмнөх тоглолтын тохиргоо дараагийнхад дамжихгүй (эзний шийдвэр 2026-08-30).
+    private bool _wasInMatch;
+    private DateTime? _noSkillsSince;
+    private DateTime? _idleSince;
+    private static readonly TimeSpan MatchOverAfter = TimeSpan.FromMinutes(4);
+
+    /// <summary>Тоглолт дууссан гэж үзээд бүх skill үсэг цэвэрлэнэ. 4 минутын босго нь
+    /// DotA-ийн хамгийн урт амиа хүлээх хугацаанаас урт тул тоглолтын ДУНД цэвэрлэгдэхгүй.</summary>
+    private void ResetSkillAssignments(string reason)
+    {
+        _wasInMatch = false;
+        _noSkillsSince = null;
+        _idleSince = null;
+        if (_profile.SkillLetters.Count == 0)
+            return;
+        DiagnosticLog.Write($"тоглолт дууссан ({reason}) — {_profile.SkillLetters.Count} skill үсэг автоматаар цэвэрлэгдэв");
+        _profile.SkillLetters.Clear();
+        foreach (var row in DetectedSkills)
+            row.Assigned = "";
+        Save();
+    }
+
     private void TickLog(string message)
     {
         if (message == _lastTickLog)
@@ -727,9 +760,21 @@ public sealed partial class MainViewModel : ObservableObject
         }
         if (!_watcher.IsGameFocused())
         {
+            if (_wasInMatch)
+            {
+                if (!GameWindowWatcher.IsGameProcessRunning())
+                    ResetSkillAssignments("Warcraft хаагдсан");
+                else
+                {
+                    _idleSince ??= DateTime.UtcNow;
+                    if (DateTime.UtcNow - _idleSince > MatchOverAfter)
+                        ResetSkillAssignments("тоглоом удаан идэвхгүй");
+                }
+            }
             TickLog("waiting for Warcraft to be the focused window");
             return;
         }
+        _idleSince = null;
         TickLog("Warcraft focused, polling command card");
         if (Interlocked.CompareExchange(ref _autoPassRunning, 1, 0) != 0)
             return;   // a pass is still going; don't stack them
@@ -749,6 +794,23 @@ public sealed partial class MainViewModel : ObservableObject
             Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
             {
                 _war3NeedsAdmin = result.Status == LiveHotkeyReader.Status.NeedAdmin;
+                // Тоглолтын амьдралын мөчлөг: карт харагдвал тоглолтод байна;
+                // war3 хаагдвал шууд, карт удаан алга болвол (менюнд гарсан) reset.
+                if (result.Status == LiveHotkeyReader.Status.Ok && result.Skills.Count > 0)
+                {
+                    _wasInMatch = true;
+                    _noSkillsSince = null;
+                }
+                else if (_wasInMatch && result.Status == LiveHotkeyReader.Status.NotRunning)
+                {
+                    ResetSkillAssignments("Warcraft хаагдсан");
+                }
+                else if (_wasInMatch && result.Status == LiveHotkeyReader.Status.NoSkills)
+                {
+                    _noSkillsSince ??= DateTime.UtcNow;
+                    if (DateTime.UtcNow - _noSkillsSince > MatchOverAfter)
+                        ResetSkillAssignments("тоглолт дууссан");
+                }
                 SyncDetectedSkills(result.Skills);
                 RefreshConflicts();
             }));
