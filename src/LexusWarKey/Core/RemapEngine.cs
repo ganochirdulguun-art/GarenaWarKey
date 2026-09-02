@@ -21,14 +21,16 @@ public sealed class RemapEngine
 {
     private readonly Func<WarKeyProfile> _profile;
     private readonly Func<bool> _gameFocused;
+    private readonly Func<bool> _activated;
     private readonly Func<long> _nowMs;
 
     public RemapEngine(Func<WarKeyProfile> profile, Func<bool> gameFocused, Func<bool>? activated = null,
                        Func<long>? nowMs = null)
     {
-        _ = activated;
         _profile = profile;
         _gameFocused = gameFocused;
+        // activated=false бол апп эрхгүй/платформгүй → бүх remap идэвхгүй (pass-through)
+        _activated = activated ?? (() => true);
         _nowMs = nowMs ?? (() => Environment.TickCount64);
     }
 
@@ -88,6 +90,8 @@ public sealed class RemapEngine
     public RemapDecision Decide(int vk, bool isKeyDown, bool ctrlHeld, bool altHeld)
     {
         var profile = _profile();
+        if (!_activated())
+            return RemapDecision.PassThrough;
         if (!profile.Enabled || SuspendedForTyping)
             return RemapDecision.PassThrough;
         if (!_gameFocused())

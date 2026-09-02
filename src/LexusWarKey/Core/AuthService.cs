@@ -20,10 +20,15 @@ public sealed class AuthService
 
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(15) };
     private readonly string _tokenPath;
+    private readonly string _entitledPath;
 
     public string? Token { get; private set; }
     public string? Username { get; private set; }
     public string? DiscordId { get; private set; }
+
+    /// <summary>Сервер сүүлд мэдэгдсэн эрх: GarenaSystem тэмцээний түүхтэй (эсвэл эзэн/админ)
+    /// хэрэглэгч бол WarKey-г хаана ч ашиглана. Түүхгүй бол зөвхөн платформтой хослуулна.</summary>
+    public bool Entitled { get; private set; }
 
     public bool IsLoggedIn => !string.IsNullOrEmpty(Token);
 
@@ -33,6 +38,7 @@ public sealed class AuthService
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "LexusWarKey");
         try { Directory.CreateDirectory(root); } catch { }
         _tokenPath = Path.Combine(root, "auth.dat");
+        _entitledPath = Path.Combine(root, "entitled.dat");
     }
 
     public void LoadToken()
@@ -45,6 +51,16 @@ public sealed class AuthService
             SetToken(Encoding.UTF8.GetString(raw));
         }
         catch { Token = null; }
+        // Сүүлд серверээс баталсан эрхийг кэшээс сэргээнэ — офлайн (PC төвд LAN) үед ч
+        // тэмцээний түүхтэй хэрэглэгч ажиллуулах боломжтой байхын тулд.
+        try { Entitled = File.Exists(_entitledPath) && File.ReadAllText(_entitledPath).Trim() == "1"; }
+        catch { /* кэш эмзэг биш */ }
+    }
+
+    private void CacheEntitled(bool value)
+    {
+        Entitled = value;
+        try { File.WriteAllText(_entitledPath, value ? "1" : "0"); } catch { }
     }
 
     public void SaveToken(string token)
@@ -63,7 +79,9 @@ public sealed class AuthService
         Token = null;
         Username = null;
         DiscordId = null;
+        Entitled = false;
         try { if (File.Exists(_tokenPath)) File.Delete(_tokenPath); } catch { }
+        try { if (File.Exists(_entitledPath)) File.Delete(_entitledPath); } catch { }
     }
 
     private void SetToken(string token)
@@ -150,6 +168,17 @@ public sealed class AuthService
             }
             if (resp.StatusCode == HttpStatusCode.Unauthorized)
                 return HeartbeatResult.Unauthorized;
+            // Амжилттай хариунаас эрхийг (entitled) уншина — WarKey-ийн gate үүнд тулгуурлана.
+            if (resp.IsSuccessStatusCode)
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+                    if (doc.RootElement.TryGetProperty("entitled", out var e))
+                        CacheEntitled(e.ValueKind == JsonValueKind.True);
+                }
+                catch { /* entitled уншилт эмзэг биш; хуучин утга хэвээр */ }
+            }
             return HeartbeatResult.Ok;
         }
         catch

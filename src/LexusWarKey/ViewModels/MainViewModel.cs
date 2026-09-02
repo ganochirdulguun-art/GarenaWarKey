@@ -173,6 +173,8 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _statusDetail = "";
     [ObservableProperty] private bool _statusIsLive;
     [ObservableProperty] private bool _hasStatus;
+    // Апп түгжигдсэн эсэх: тэмцээний түүхгүй + платформ идэвхгүй → бүх функц зогсоно.
+    [ObservableProperty] private bool _locked;
     [ObservableProperty] private string _problemText = "";
     [ObservableProperty] private bool _hasProblems;
     [ObservableProperty] private bool _isCapturing;
@@ -285,7 +287,8 @@ public sealed partial class MainViewModel : ObservableObject
         DiagnosticLog.Write($"startup; skill binds={_profile.Skills.Count(m => m.ClaimsKey)}, warning={_store.LoadWarning ?? "none"}");
 
         _watcher = new GameWindowWatcher();
-        _engine = new RemapEngine(() => _profile, _watcher.IsGameFocused);
+        // activated: түгжигдсэн (эрхгүй + платформгүй) үед бүх remap идэвхгүй
+        _engine = new RemapEngine(() => _profile, _watcher.IsGameFocused, () => !Locked);
         _engine.ChatOpenChanged += open =>
             DiagnosticLog.Write(open
                 ? "chat line opened; remapping suspended"
@@ -368,6 +371,8 @@ public sealed partial class MainViewModel : ObservableObject
             Application.Current?.Dispatcher.BeginInvoke(new Action(() => BannedDetected?.Invoke()));
         else if (result == Core.HeartbeatResult.Unauthorized)
             Application.Current?.Dispatcher.BeginInvoke(new Action(() => ReloginRequested?.Invoke()));
+        else if (result == Core.HeartbeatResult.Ok)
+            Application.Current?.Dispatcher.BeginInvoke(new Action(UpdateGate));   // шинэ entitled-ийг тусгах
     }
 
     /// <summary>Re-reads the signed-in name after a login/re-login.</summary>
@@ -609,6 +614,18 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
+        UpdateGate();
+        if (Locked)
+        {
+            // Тэмцээний түүхгүй + платформгүй үед overlay-г нээхгүй, шалтгааныг тайлбарлана.
+            System.Windows.MessageBox.Show(
+                LockNoticeText,
+                "Garena.mn WarKey",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+            return;
+        }
+
         _overlaySession.Reset();
         EnsureOverlay();
         _hook.ConfigMode = true;
@@ -753,9 +770,9 @@ public sealed partial class MainViewModel : ObservableObject
 
     private void OnAutoTick()
     {
-        if (_skillWriter is null || !IsEnabled)
+        if (_skillWriter is null || !IsEnabled || Locked)
         {
-            TickLog($"idle: writer={( _skillWriter is not null)}, enabled={IsEnabled}, elevated={_isElevated}");
+            TickLog($"idle: writer={( _skillWriter is not null)}, enabled={IsEnabled}, locked={Locked}, elevated={_isElevated}");
             return;
         }
         if (!_watcher.IsGameFocused())
@@ -940,10 +957,23 @@ public sealed partial class MainViewModel : ObservableObject
         ProblemText = string.Join("\n", problems.Select(p => "- " + p));
     }
 
+    // Апп ашиглах эрхийг шинэчилнэ: эзэн/тэмцээний түүхтэй бол хаана ч; үгүй бол зөвхөн
+    // Garena.mn платформ энэ PC дээр ажиллаж байх үед. Түгжигдвэл remap/skill-бичих/overlay зогсоно.
+    private void UpdateGate()
+    {
+        bool entitled = App.Auth?.Entitled ?? false;
+        bool platform = Core.PlatformPresence.IsActive();
+        Locked = !(entitled || platform);
+    }
+
+    public const string LockNoticeText =
+        "Энэхүү тоглоом дотроо шууд үсэг тааруулдаг WarKey нь зөвхөн Garena.mn платформыг ашиглаж байх үед ажиллана. GarenaSystem-д тэмцээний түүхтэй бол GameRanger/LAN дээр ч чөлөөтэй ашиглана.";
+
     private void RefreshStatus()
     {
+        UpdateGate();
         var focused = _watcher.IsGameFocused();
-        StatusIsLive = IsEnabled && focused && !_engine.ChatOpen;
+        StatusIsLive = IsEnabled && !Locked && focused && !_engine.ChatOpen;
 
         if (!focused)
             _engine.ResetChatState();
@@ -965,7 +995,12 @@ public sealed partial class MainViewModel : ObservableObject
             }
         }
 
-        if (!IsEnabled)
+        if (Locked)
+        {
+            StatusText = "🔒 Платформ шаардлагатай";
+            StatusDetail = LockNoticeText;
+        }
+        else if (!IsEnabled)
         {
             StatusText = "Disabled";
             StatusDetail = "";
