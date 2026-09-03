@@ -352,7 +352,8 @@ public sealed partial class MainViewModel : ObservableObject
         _heartbeatTimer.Start();
         _ = SendHeartbeatAsync();   // mark online right away
 
-        _ = CheckForUpdatesOnStartupAsync();   // auto-download a newer version in the background
+        if (!Core.EmbeddedHost.IsEmbedded)
+            _ = CheckForUpdatesOnStartupAsync();   // auto-download a newer version in the background (standalone л)
 
         Save();
         RefreshStatus();

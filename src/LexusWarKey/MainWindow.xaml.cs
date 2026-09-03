@@ -34,6 +34,7 @@ public partial class MainWindow : Window
             if (_banned)
                 return;
             _banned = true;
+            if (Core.EmbeddedHost.IsEmbedded) { Application.Current.Shutdown(5); return; }
             App.Auth.ClearToken();
             MessageBox.Show(
                 "Таны Discord акаунтыг Garena.mn WarKey ашиглахыг хориглосон байна.\nАдминтай холбогдоно уу.",
@@ -51,6 +52,7 @@ public partial class MainWindow : Window
             if (_relogging)
                 return;
             _relogging = true;
+            if (Core.EmbeddedHost.IsEmbedded) { Application.Current.Shutdown(6); return; }   // платформ шинэ токентой дахин асаана
             App.Auth.ClearToken();
 
             var login = new Views.LoginWindow(App.Auth);

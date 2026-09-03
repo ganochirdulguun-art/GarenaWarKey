@@ -74,6 +74,10 @@ public sealed class AuthService
         catch { }
     }
 
+    /// <summary>Платформоос (embedded горим) ирсэн JWT-г зөвхөн санах ойд хэрэглэнэ — auth.dat-д
+    /// бичихгүй тул standalone нэвтрэлттэй холилдохгүй. Entitled нь эхний heartbeat-аар шинэчлэгдэнэ.</summary>
+    public void UseSessionToken(string token) => SetToken(token);
+
     public void ClearToken()
     {
         Token = null;

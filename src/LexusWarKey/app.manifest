@@ -11,7 +11,9 @@
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
+        <!-- asInvoker (2026-09-03): Garena.mn платформ энгийн эрхээр далд асаадаг болсон. WC3 энгийн эрхээр ажиллаж
+             байвал бүх функц хэвийн; WC3 админ эрхээр ажиллаж байвал апп анхааруулж, админаар дахин асаахыг санал болгоно. -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
     </security>
   </trustInfo>
