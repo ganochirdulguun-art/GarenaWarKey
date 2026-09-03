@@ -11,9 +11,9 @@
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
     <security>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <!-- asInvoker (2026-09-03): Garena.mn платформ энгийн эрхээр далд асаадаг болсон. WC3 энгийн эрхээр ажиллаж
-             байвал бүх функц хэвийн; WC3 админ эрхээр ажиллаж байвал апп анхааруулж, админаар дахин асаахыг санал болгоно. -->
-        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+        <!-- requireAdministrator (2026-09-03 буцаав): WC3 ихэвчлэн админ эрхээр ажилладаг тул skill уншихад админ эрх заавал.
+             Платформд шигтгэх туршилт (v2.7.0 asInvoker) буцаагдсан; embedded код идэвхгүй үлдэнэ. -->
+        <requestedExecutionLevel level="requireAdministrator" uiAccess="false" />
       </requestedPrivileges>
     </security>
   </trustInfo>
